@@ -5,6 +5,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
 
+final FirebaseAuth _auth = FirebaseAuth.instance;
+final GoogleSignIn _googleSignIn = new GoogleSignIn();
+
 class LoginScreen extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
@@ -13,9 +16,6 @@ class LoginScreen extends StatefulWidget {
 }
 
 class LoginScreenState extends State<LoginScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = new GoogleSignIn();
-
   final GlobalKey<FormState> formKey = new GlobalKey<FormState>();
   final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
 
@@ -33,22 +33,37 @@ class LoginScreenState extends State<LoginScreen> {
     return user;
   }
 
-  void _submit() {
-    final form = formKey.currentState;
-    if (form.validate()) {
-      form.save();
-      setState(() => _isLoading = true);
+  Future<Null> _ensureLoggedIn() async {
+    GoogleSignInAccount user = _googleSignIn.currentUser;
 
-      new Timer(const Duration(seconds: 3), () {
-        if (_email == 'a' && _password == 'b') {
-          Navigator.of(context).pushReplacementNamed('/home');
-          return;
-        }
-        scaffoldKey.currentState.showSnackBar(
-            new SnackBar(content: new Text('로그인 실패, 이메일은 a, 비밀번호는 b')));
-        setState(() => _isLoading = false);
-      });
+    if (user == null) {
+      print('first user check $user');
+      user = await _googleSignIn.signInSilently();
     }
+
+    if (user == null) {
+      print('second user check $user');
+      await _googleSignIn.signIn();
+      // analytics.logLogin();
+    }
+
+    if (await _auth.currentUser() == null) {
+      print('third user check $user');
+      GoogleSignInAuthentication credentials =
+          await _googleSignIn.currentUser.authentication;
+      await _auth.signInWithGoogle(
+        idToken: credentials.idToken,
+        accessToken: credentials.accessToken,
+      );
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    (() async {
+      await _ensureLoggedIn();
+    });
   }
 
   @override
@@ -74,35 +89,12 @@ class LoginScreenState extends State<LoginScreen> {
                         fontSize: 20.0,
                       ),
                     ),
-                    new TextFormField(
-                      autofocus: true,
-                      onSaved: (val) => _email = val,
-                      decoration: new InputDecoration(
-                        border: const UnderlineInputBorder(),
-                        icon: const Icon(Icons.email),
-                        labelText: 'E-mail',
-                        hintText: 'admin@example.com',
-                      ),
-                    ),
-                    const SizedBox(height: 24.0),
-                    new TextFormField(
-                      onSaved: (val) => _password = val,
-                      obscureText: true,
-                      decoration: new InputDecoration(
-                        border: const UnderlineInputBorder(),
-                        icon: const Icon(Icons.lock),
-                        labelText: 'Password',
-                      ),
-                    ),
-                    const SizedBox(height: 24.0),
-                    new RaisedButton(
-                      onPressed: _submit,
-                      child: new Text('Login'),
-                    ),
                     const SizedBox(height: 24.0),
                     new RaisedButton(
                       onPressed: () => _testSignInWithGoogle()
-                          .then((FirebaseUser user) => print(user))
+                          .then((FirebaseUser user) {
+                            Navigator.of(context).pushReplacementNamed('/home');
+                          })
                           .catchError((e) => print(e)),
                       child: new Text('Sign In With Google'),
                     ),
