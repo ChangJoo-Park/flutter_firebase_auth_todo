@@ -9,6 +9,9 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.0
 
+  google_sign_in: "^3.0.1"
+  firebase_auth: "^0.5.4"
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -53,5 +56,5 @@ flutter:
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
   #
-  # For details regarding fonts from package dependencies, 
+  # For details regarding fonts from package dependencies,
   # see https://flutter.io/custom-fonts/#from-packages
