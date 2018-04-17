@@ -13,11 +13,25 @@ class LoginScreen extends StatefulWidget {
 }
 
 class LoginScreenState extends State<LoginScreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = new GoogleSignIn();
+
   final GlobalKey<FormState> formKey = new GlobalKey<FormState>();
   final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
 
   String _email, _password = '';
   bool _isLoading = false;
+
+  Future<FirebaseUser> _testSignInWithGoogle() async {
+    GoogleSignInAccount googleSignInAccount = await _googleSignIn.signIn();
+    GoogleSignInAuthentication gSA = await googleSignInAccount.authentication;
+
+    FirebaseUser user = await _auth.signInWithGoogle(
+        idToken: gSA.idToken, accessToken: gSA.accessToken);
+
+    print("User Name : ${user.displayName}");
+    return user;
+  }
 
   void _submit() {
     final form = formKey.currentState;
@@ -48,16 +62,18 @@ class LoginScreenState extends State<LoginScreen> {
           key: formKey,
           child: _isLoading
               ? new Container(
-                alignment: Alignment.center,
-                child: new CircularProgressIndicator(),
-              )
+                  alignment: Alignment.center,
+                  child: new CircularProgressIndicator(),
+                )
               : new Column(
                   children: <Widget>[
                     const SizedBox(height: 24.0),
-                    new Text('Login App',
-                    style: new TextStyle(
-                      fontSize: 20.0,
-                    ),),
+                    new Text(
+                      'Login App',
+                      style: new TextStyle(
+                        fontSize: 20.0,
+                      ),
+                    ),
                     new TextFormField(
                       autofocus: true,
                       onSaved: (val) => _email = val,
@@ -80,7 +96,16 @@ class LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 24.0),
                     new RaisedButton(
-                        onPressed: _submit, child: new Text('Login'))
+                      onPressed: _submit,
+                      child: new Text('Login'),
+                    ),
+                    const SizedBox(height: 24.0),
+                    new RaisedButton(
+                      onPressed: () => _testSignInWithGoogle()
+                          .then((FirebaseUser user) => print(user))
+                          .catchError((e) => print(e)),
+                      child: new Text('Sign In With Google'),
+                    ),
                   ],
                 ),
         ),
