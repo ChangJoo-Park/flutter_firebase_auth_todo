@@ -20,10 +20,6 @@ class LoginScreenState extends State<LoginScreen> {
     final form = formKey.currentState;
     if (form.validate()) {
       form.save();
-      print("form show");
-      print(_email);
-      print(_password);
-
       setState(() => _isLoading = true);
 
       new Timer(const Duration(seconds: 3), () {
@@ -31,8 +27,8 @@ class LoginScreenState extends State<LoginScreen> {
           Navigator.of(context).pushReplacementNamed('/home');
           return;
         }
-        scaffoldKey.currentState
-            .showSnackBar(new SnackBar(content: new Text('로그인 실패, 이메일은 a, 비밀번호는 b')));
+        scaffoldKey.currentState.showSnackBar(
+            new SnackBar(content: new Text('로그인 실패, 이메일은 a, 비밀번호는 b')));
         setState(() => _isLoading = false);
       });
     }
@@ -42,43 +38,48 @@ class LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return new Scaffold(
       key: scaffoldKey,
-      appBar: new AppBar(
-        title: new Text('Login'),
-      ),
       body: new SafeArea(
         top: false,
         bottom: false,
         child: new Form(
           key: formKey,
-          child: new Column(
-            children: <Widget>[
-              new TextFormField(
-                autofocus: true,
-                onSaved: (val) => _email = val,
-                decoration: new InputDecoration(
-                  border: const UnderlineInputBorder(),
-                  icon: const Icon(Icons.email),
-                  labelText: 'E-mail',
-                  hintText: 'admin@example.com',
+          child: _isLoading
+              ? new Container(
+                alignment: Alignment.center,
+                child: new CircularProgressIndicator(),
+              )
+              : new Column(
+                  children: <Widget>[
+                    const SizedBox(height: 24.0),
+                    new Text('Login App',
+                    style: new TextStyle(
+                      fontSize: 20.0,
+                    ),),
+                    new TextFormField(
+                      autofocus: true,
+                      onSaved: (val) => _email = val,
+                      decoration: new InputDecoration(
+                        border: const UnderlineInputBorder(),
+                        icon: const Icon(Icons.email),
+                        labelText: 'E-mail',
+                        hintText: 'admin@example.com',
+                      ),
+                    ),
+                    const SizedBox(height: 24.0),
+                    new TextFormField(
+                      onSaved: (val) => _password = val,
+                      obscureText: true,
+                      decoration: new InputDecoration(
+                        border: const UnderlineInputBorder(),
+                        icon: const Icon(Icons.lock),
+                        labelText: 'Password',
+                      ),
+                    ),
+                    const SizedBox(height: 24.0),
+                    new RaisedButton(
+                        onPressed: _submit, child: new Text('Login'))
+                  ],
                 ),
-              ),
-              const SizedBox(height: 24.0),
-              new TextFormField(
-                onSaved: (val) => _password = val,
-                obscureText: true,
-                decoration: new InputDecoration(
-                  border: const UnderlineInputBorder(),
-                  icon: const Icon(Icons.lock),
-                  labelText: 'Password',
-                ),
-              ),
-              const SizedBox(height: 24.0),
-              _isLoading
-                  ? new CircularProgressIndicator()
-                  : new RaisedButton(
-                      onPressed: _submit, child: new Text('Login'))
-            ],
-          ),
         ),
       ),
     );
