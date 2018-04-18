@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
 
+import 'package:flutter_firebase_auth_app/store.dart' as store;
+
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final GoogleSignIn _googleSignIn = new GoogleSignIn();
 
@@ -19,8 +21,14 @@ class LoginScreenState extends State<LoginScreen> {
   final GlobalKey<FormState> formKey = new GlobalKey<FormState>();
   final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
 
-  String _email, _password = '';
   bool _isLoading = false;
+
+  Future ensureLogIn() async {
+    dynamic user = await store.logIn;
+    if (user) {
+      Navigator.of(context).pushReplacementNamed('/home');
+    }
+  }
 
   Future<FirebaseUser> _testSignInWithGoogle() async {
     GoogleSignInAccount googleSignInAccount = await _googleSignIn.signIn();
@@ -35,46 +43,10 @@ class LoginScreenState extends State<LoginScreen> {
     return user;
   }
 
-  Future<Null> _ensureLoggedIn() async {
-    GoogleSignInAccount user = _googleSignIn.currentUser;
-
-    if (user == null) {
-      print('first user check $user');
-      user = await _googleSignIn.signInSilently();
-    }
-
-    if (user == null) {
-      print('second user check $user');
-      await _googleSignIn.signIn();
-      // analytics.logLogin();
-    }
-
-    if (await _auth.currentUser() == null) {
-      print('third user check $user');
-      GoogleSignInAuthentication credentials =
-          await _googleSignIn.currentUser.authentication;
-      await _auth.signInWithGoogle(
-        idToken: credentials.idToken,
-        accessToken: credentials.accessToken,
-      );
-    }
-    print('final current user check');
-
-    if (user != null) {
-      Navigator.of(context).pushReplacementNamed('/home');
-    } else {
-      print('hello world');
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-    (() async {
-      print("before ensure logged in");
-      await _ensureLoggedIn();
-      print("after ensure logged in");
-    })();
+    this.ensureLogIn();
   }
 
   @override
