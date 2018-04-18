@@ -1,12 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
-final FirebaseAuth _auth = FirebaseAuth.instance;
-final GoogleSignIn _googleSignIn = new GoogleSignIn();
+import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter_firebase_auth_app/store.dart' as store;
+import 'package:flutter_firebase_auth_app/models/article.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -16,44 +13,36 @@ class HomeScreen extends StatefulWidget {
 }
 
 class HomeScreenState extends State<HomeScreen> {
-  GoogleSignInAccount _user;
+  DataSnapshot snapshot;
+  var sources;
+  List<Article> articles = [];
 
-  Future<Null> _ensureLoggedIn() async {
-    GoogleSignInAccount user = _googleSignIn.currentUser;
+  Future getData() async {
+    var snap = await store.articleSourcesDatabaseReference.once();
+    if (mounted) {
+      this.setState(() {
+        snapshot = snap;
 
-    if (user == null) {
-      user = await _googleSignIn.signInSilently();
-    }
-
-    if (user == null) {
-      await _googleSignIn.signIn();
-      // analytics.logLogin();
-    }
-
-    if (await _auth.currentUser() == null) {
-      GoogleSignInAuthentication credentials =
-          await _googleSignIn.currentUser.authentication;
-      await _auth.signInWithGoogle(
-        idToken: credentials.idToken,
-        accessToken: credentials.accessToken,
-      );
-    }
-    if (user != null) {
-      setState(() {
-        this._user = user;
+        if (snapshot.value == null) {
+          store.articleSourcesDatabaseReference.push().set({
+            'title': 'Hello',
+            'body': 'World',
+          });
+        } else {
+          print('home snapshot');
+          snapshot.value.forEach((k, v) {
+            articles.add(new Article(k, v['title'], v['body']));
+          });
+        }
       });
-      print('user has exists');
     }
+    return "Success!";
   }
 
   @override
   void initState() {
     super.initState();
-    (() async {
-      print("before ensure logged in");
-      await _ensureLoggedIn();
-      print("after ensure logged in");
-    })();
+    this.getData();
   }
 
   @override
@@ -65,16 +54,42 @@ class HomeScreenState extends State<HomeScreen> {
           new IconButton(
             icon: new Icon(Icons.exit_to_app),
             onPressed: () async {
-              await _googleSignIn.signOut();
-              await _auth.signOut();
               Navigator.of(context).pushReplacementNamed('/login');
             },
           ),
         ],
       ),
       body: new Center(
-        child: new Text(''),
+        child: snapshot == null
+            ? new CircularProgressIndicator()
+            : new ListView.builder(
+                itemBuilder: _buildArticleList,
+                itemCount: articles.length,
+              ),
       ),
     );
+  }
+
+  Widget _buildArticleList(context, index) {
+    return new ArticleItemWidget(articles[index]);
+  }
+}
+
+class ArticleItemWidget extends StatelessWidget {
+  final Article item;
+
+  const ArticleItemWidget(this.item);
+
+  Widget _buildTiles(BuildContext context, Article item) {
+    return new ListTile(
+      title: new Text(item.title),
+      subtitle: new Text(item.body),
+      onTap: () => print('hello'),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _buildTiles(context, item);
   }
 }
