@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "999919143856",
+    "firebase_url": "https://flutter-firebase-todo.firebaseio.com",
+    "project_id": "flutter-firebase-todo",
+    "storage_bucket": "flutter-firebase-todo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:999919143856:android:df4afc60beceac85",
+        "android_client_info": {
+          "package_name": "changjoopark.com.flutterfirebaseauthapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "999919143856-7qcubaq9cpaqqcp9ok5e3ll14jtod5hg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "changjoopark.com.flutterfirebaseauthapp",
+            "certificate_hash": "2c6e4d72e6a15db527d58f625fe093cfae626a15"
+          }
+        },
+        {
+          "client_id": "999919143856-omunegc4mlcnfbncr71vs6thtnh4d2ea.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFATUuikxMV7Y1bwGR6XXypBBkGhRZRro"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "999919143856-omunegc4mlcnfbncr71vs6thtnh4d2ea.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
