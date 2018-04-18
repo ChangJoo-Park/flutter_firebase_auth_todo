@@ -27,7 +27,9 @@ class LoginScreenState extends State<LoginScreen> {
     GoogleSignInAuthentication gSA = await googleSignInAccount.authentication;
 
     FirebaseUser user = await _auth.signInWithGoogle(
-        idToken: gSA.idToken, accessToken: gSA.accessToken);
+      idToken: gSA.idToken,
+      accessToken: gSA.accessToken,
+    );
 
     print("User Name : ${user.displayName}");
     return user;
@@ -56,14 +58,23 @@ class LoginScreenState extends State<LoginScreen> {
         accessToken: credentials.accessToken,
       );
     }
+    print('final current user check');
+
+    if (user != null) {
+      Navigator.of(context).pushReplacementNamed('/home');
+    } else {
+      print('hello world');
+    }
   }
 
   @override
   void initState() {
     super.initState();
     (() async {
+      print("before ensure logged in");
       await _ensureLoggedIn();
-    });
+      print("after ensure logged in");
+    })();
   }
 
   @override
@@ -91,11 +102,10 @@ class LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 24.0),
                     new RaisedButton(
-                      onPressed: () => _testSignInWithGoogle()
-                          .then((FirebaseUser user) {
+                      onPressed: () =>
+                          _testSignInWithGoogle().then((FirebaseUser user) {
                             Navigator.of(context).pushReplacementNamed('/home');
-                          })
-                          .catchError((e) => print(e)),
+                          }).catchError((e) => print(e)),
                       child: new Text('Sign In With Google'),
                     ),
                   ],
